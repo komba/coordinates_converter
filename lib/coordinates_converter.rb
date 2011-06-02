@@ -1,6 +1,9 @@
+require 'math'
 class CoordinatesConverter
   attr_reader :x, :y, :zone, :northern_hemisphere, :lat, :lng
 
+  X_ERROR = 0.001317089164991181 - 0.000232073437079983
+  Y_ERROR = 0.0017442271873235882 + 0.000115913046897731
   MAJOR_AXIS = 6378137.0
   MINOR_AXIS = 6356752.3
   ECC = (MAJOR_AXIS * MAJOR_AXIS - MINOR_AXIS * MINOR_AXIS) / (MAJOR_AXIS * MAJOR_AXIS)
@@ -8,21 +11,22 @@ class CoordinatesConverter
   K0 = 0.9996
   E4 = ECC * ECC
   E6 = ECC * E4
-  
+  DEFAULT_UTM_ZONE = 37
+
   # Initializes a new instance of CoordinatesConverter
   # == Parameters
   # utm
   # * :x => the utm_x coordinate, as a float. Default 0.
   # * :y => the utm_y coordinate, as a float. Default 0.
-  # * :zone => the utm_zone coordinate, as an integer. Default 31 (Because I'm Catalan!).
-  # * :northern_hemisphere => defines if the coordinate is at the northern hemisphere, as a boolean. Default true (Because I'm Catalan!).
+  # * :zone => the utm_zone coordinate, as an integer. Default 35 (Moscow)
+  # * :northern_hemisphere => defines if the coordinate is at the northern hemisphere, as a boolean. Default true (Moscow).
   # latituge longitude
   # * :lat => the latitude coordinate, as a float. Default 0.
   # * :lng => the longitude coordinate, as a float. Default 0.
   def initialize(opts={})
     @x=opts[:x].to_f || 0
     @y=opts[:y].to_f || 0
-    @zone=opts[:zone] || 31
+    @zone=opts[:zone] || DEFAULT_UTM_ZONE
     @northern_hemisphere=opts[:northern_hemisphere] || true
     @lat=(opts[:lat].to_f > -180 && opts[:lat].to_f < 180 ? opts[:lat].to_f : 0)
     @lng=(opts[:lng].to_f > -90 && opts[:lng].to_f < 90 ? opts[:lng].to_f : 0)
@@ -33,7 +37,7 @@ class CoordinatesConverter
   end
 
   def y=(y)
-    @y = y.to_f 
+    @y = y.to_f
   end
 
   def zone=(zone)
